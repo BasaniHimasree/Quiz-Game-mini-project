@@ -2,7 +2,7 @@ import {Component} from 'react'
 import Cookies from 'js-cookie'
 import {Redirect} from 'react-router-dom'
 import Loader from 'react-loader-spinner'
-import QuestionContext from '../../context/QuestionsContext'
+
 import Header from '../Header'
 
 import './index.css'
@@ -127,7 +127,14 @@ class QuizGameRoute extends Component {
   }
 
   handleNextQuestion = () => {
-    const {currentQuestionIndex, questions} = this.state
+    const {
+      currentQuestionIndex,
+      questions,
+      correctlyAttempted,
+      totalQuestions,
+      wrongAnswers,
+      unAttemptedQuestions,
+    } = this.state
 
     if (currentQuestionIndex + 1 < questions.length) {
       this.setState(
@@ -141,9 +148,33 @@ class QuizGameRoute extends Component {
       )
     } else {
       const {history} = this.props
-      history.push('/game-results')
+      this.setState(
+        prevState => ({
+          correctlyAttempted: prevState.correctlyAttempted,
+          totalQuestions: prevState.totalQuestions,
+          wrongAnswers: prevState.wrongAnswers,
+          unAttemptedQuestions: prevState.unAttemptedQuestions,
+        }),
+        () => {
+          localStorage.setItem(
+            'quizResults',
+            JSON.stringify({
+              correctlyAttempted,
+              totalQuestions,
+              wrongAnswers,
+              unAttemptedQuestions,
+            }),
+          )
+
+          history.push('/game-results', {
+            correctlyAttempted,
+            totalQuestions,
+            unAttemptedQuestions,
+            wrongAnswers,
+          })
+        },
+      )
     }
-    clearInterval(this.timerInterval)
   }
 
   renderQuestionOptions = question => {
@@ -164,8 +195,7 @@ class QuizGameRoute extends Component {
                     aria-label="close"
                     className="onclick-button"
                     onClick={() =>
-                      !selectedOption &&
-                      this.handleOptionSelect(option.id, option.is_correct)
+                      !selectedOption && this.handleOptionSelect(option.id)
                     }
                   >
                     {option.text}
@@ -190,8 +220,7 @@ class QuizGameRoute extends Component {
                     aria-label="close"
                     className="image-button"
                     onClick={() =>
-                      !selectedOption &&
-                      this.handleOptionSelect(option.id, option.is_correct)
+                      !selectedOption && this.handleOptionSelect(option.id)
                     }
                   />
                 </li>
@@ -216,8 +245,7 @@ class QuizGameRoute extends Component {
                     aria-label="close"
                     value={option.text}
                     onClick={() =>
-                      !selectedOption &&
-                      this.handleOptionSelect(option.id, option.is_correct)
+                      !selectedOption && this.handleOptionSelect(option.id)
                     }
                   />
                   <label htmlFor={`option-${option.id}`}>{option.text}</label>
@@ -263,9 +291,6 @@ class QuizGameRoute extends Component {
       questions,
       currentQuestionIndex,
       timer,
-      correctlyAttempted,
-      unAttemptedQuestions,
-      wrongAnswers,
       isNextEnabled,
       totalQuestions,
     } = this.state
@@ -276,41 +301,32 @@ class QuizGameRoute extends Component {
 
     const activeQuestion = currentQuestionIndex + 1
     return (
-      <QuestionContext.Provider
-        value={{
-          correctlyAttempted,
-          totalQuestions,
-          unAttemptedQuestions,
-          wrongAnswers,
-        }}
-      >
-        <div className="quizgame-container">
-          <Header />
-          <div className="quizgame-bottom-container">
-            <div className="timelimit-container">
-              <div className="question-number">
-                <p>Question</p>
-                <p className="paragraph">
-                  {currentQuestionIndex + 1} / {questions.length}
-                </p>
-              </div>
-
-              <p className="timelimit">{timer}</p>
+      <div className="quizgame-container">
+        <Header />
+        <div className="quizgame-bottom-container">
+          <div className="timelimit-container">
+            <div className="question-number">
+              <p>Question</p>
+              <p className="paragraph">
+                {currentQuestionIndex + 1} / {questions.length}
+              </p>
             </div>
 
-            <div>{this.renderQuestionOptions(currentQuestion)}</div>
-
-            <button
-              type="button"
-              onClick={this.handleNextQuestion}
-              disabled={!isNextEnabled}
-              className={`onclick-button ${buttonStyle}`}
-            >
-              {activeQuestion === totalQuestions ? 'Submit' : 'Next Question'}
-            </button>
+            <p className="timelimit">{timer}</p>
           </div>
+
+          <div>{this.renderQuestionOptions(currentQuestion)}</div>
+
+          <button
+            type="button"
+            onClick={this.handleNextQuestion}
+            disabled={!isNextEnabled}
+            className={`onclick-button ${buttonStyle}`}
+          >
+            {activeQuestion === totalQuestions ? 'Submit' : 'Next Question'}
+          </button>
         </div>
-      </QuestionContext.Provider>
+      </div>
     )
   }
 
