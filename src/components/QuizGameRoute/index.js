@@ -2,7 +2,7 @@ import {Component} from 'react'
 import Cookies from 'js-cookie'
 import {Link, Redirect} from 'react-router-dom'
 import Loader from 'react-loader-spinner'
-
+import QuestionContext from '../../context/QuestionsContext'
 import Header from '../Header'
 
 import './index.css'
@@ -256,9 +256,11 @@ class QuizGameRoute extends Component {
       questions,
       currentQuestionIndex,
       timer,
-
-      totalQuestions,
+      correctlyAttempted,
+      unAttemptedQuestions,
+      wrongAnswers,
       isNextEnabled,
+      totalQuestions,
     } = this.state
 
     const buttonStyle = !isNextEnabled ? 'onclick-button' : 'button-style'
@@ -267,44 +269,48 @@ class QuizGameRoute extends Component {
 
     const activeQuestion = currentQuestionIndex + 1
     return (
-      <div className="quizgame-container">
-        <Header />
-        <div className="quizgame-bottom-container">
-          <div className="timelimit-container">
-            <div className="question-number">
-              <p>Question</p>
-              <p className="paragraph">
-                {currentQuestionIndex} / {totalQuestions}
-              </p>
+      <QuestionContext.Provider
+        value={{correctlyAttempted, unAttemptedQuestions, wrongAnswers}}
+      >
+        <div className="quizgame-container">
+          <Header />
+          <div className="quizgame-bottom-container">
+            <div className="timelimit-container">
+              <div className="question-number">
+                <p>Question</p>
+                <p className="paragraph">
+                  {currentQuestionIndex + 1} / {questions.length}
+                </p>
+              </div>
+
+              <p className="timelimit">{timer}</p>
             </div>
 
-            <p className="timelimit">{timer}</p>
-          </div>
-
-          <div>{this.renderQuestionOptions(currentQuestion)}</div>
-          {activeQuestion === totalQuestions ? (
-            <Link to="/game-results">
+            <div>{this.renderQuestionOptions(currentQuestion)}</div>
+            {activeQuestion === totalQuestions ? (
+              <Link to="/game-results">
+                <button
+                  type="button"
+                  className={`onclick-button ${buttonStyle}`}
+                  onClick={this.handleNextQuestion}
+                  disabled={!isNextEnabled}
+                >
+                  Submit
+                </button>
+              </Link>
+            ) : (
               <button
                 type="button"
-                className={`onclick-button ${buttonStyle}`}
                 onClick={this.handleNextQuestion}
                 disabled={!isNextEnabled}
+                className={`onclick-button ${buttonStyle}`}
               >
-                Submit
+                Next Question
               </button>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={this.handleNextQuestion}
-              disabled={!isNextEnabled}
-              className={`onclick-button ${buttonStyle}`}
-            >
-              Next Question
-            </button>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      </QuestionContext.Provider>
     )
   }
 
