@@ -1,0 +1,133 @@
+.quizgame-container {
+  background-image: linear-gradient(to right, #f8d7dc, #f9ebed, #d8d9f6);
+  height: 100vh;
+  background-size: cover;
+}
+
+.quizgame-bottom-container {
+  background-color: #ffffff;
+  margin: 40px;
+  border-radius: 8px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+.question-number {
+  align-self: flex-start;
+  padding-left: 10px;
+  background-color: #f8d7dc;
+  height: 80px;
+  width: 100px;
+  border-radius: 5px;
+  margin-right: 500px;
+}
+.paragraph {
+  color: #ffffff;
+  font-weight: 2px bold;
+  font-size: 20px;
+  margin: 0px;
+}
+.onclick-button {
+  background-color: #e4ecf6;
+  border-radius: 8px;
+  border-width: 0px;
+  height: 40px;
+  width: 120px;
+  font-size: 13px;
+  color: black;
+  margin: 20px;
+}
+.options {
+  list-style-type: none;
+}
+.timelimit {
+  font-size: 40px;
+  margin-top: 0px;
+  margin-left: 500px;
+  padding-top: 0px;
+}
+.timelimit-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.loader-container {
+  display: felx;
+  flex: row;
+  justify-content: center;
+  align-items: center;
+}
+.button-style {
+  background-color: #008cff;
+  border-radius: 8px;
+  border-width: 0px;
+  height: 40px;
+  width: 120px;
+  font-size: 13px;
+  color: #ffffff;
+}
+.failure-view-image {
+  height: 600px;
+  width: 600px;
+}
+.questionText {
+  font-size: 35px;
+  font-weight: bold;
+}
+.each-option {
+  background-color: #e4ecf6;
+  border-radius: 8px;
+  border-width: 0px;
+  padding-right: 20px;
+  padding-left: 20px;
+  font-size: 16px;
+  color: black;
+  margin: 20px;
+}
+.all-options {
+  display: flex;
+  flex-direction: row;
+}
+.each-item {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+}
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.correct {
+  background-color: #1c944b;
+  border-radius: 8px;
+  border-width: 0px;
+  padding-right: 20px;
+  padding-left: 20px;
+  font-size: 16px;
+  color: white;
+  margin: 20px;
+}
+.incorrect {
+  background-color: #bf2626;
+  border-radius: 8px;
+  border-width: 0px;
+  padding-right: 20px;
+  padding-left: 20px;
+  font-size: 16px;
+  color: white;
+  margin: 20px;
+}
+.image-button {
+  height: 80px;
+  width: 150px;
+}
+.all-images {
+  display: flex;
+  flex-direction: column;
+}

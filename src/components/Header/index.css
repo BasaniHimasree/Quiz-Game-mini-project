@@ -1,0 +1,20 @@
+.nav-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #ffffff;
+  padding: 15px;
+}
+
+.website-logo {
+  height: 60px;
+  width: 120px;
+}
+.logout-desktop-btn {
+  color: #8b8989;
+  border-radius: 8px;
+  border-width: 3px solid;
+  border-color: #8b8989;
+  height: 50px;
+  width: 120px;
+}
