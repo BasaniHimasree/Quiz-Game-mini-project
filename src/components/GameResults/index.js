@@ -7,7 +7,8 @@ const GameResults = () => (
   <QuestionContext.Consumer>
     {value => {
       const {correctlyAttempted, totalQuestions = 10} = value
-
+      console.log('Correctly Attempted:', correctlyAttempted)
+      console.log('Total Questions:', totalQuestions)
       const number = (correctlyAttempted / totalQuestions) * 100
       const percentage = parseInt(number)
       return (

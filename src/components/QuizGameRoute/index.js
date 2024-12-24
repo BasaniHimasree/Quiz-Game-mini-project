@@ -1,6 +1,6 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
-import {Link, Redirect} from 'react-router-dom'
+import {Redirect} from 'react-router-dom'
 import Loader from 'react-loader-spinner'
 import QuestionContext from '../../context/QuestionsContext'
 import Header from '../Header'
@@ -21,11 +21,10 @@ class QuizGameRoute extends Component {
     selectedOption: null,
     timer: 15,
     isNextEnabled: false,
-    totalQuestions: 0,
-
     correctlyAttempted: 0,
     unAttemptedQuestions: 0,
     wrongAnswers: 0,
+    totalQuestions: 10,
   }
 
   componentDidMount() {
@@ -93,33 +92,38 @@ class QuizGameRoute extends Component {
       opt => opt.is_correct,
     )
     const isCorrect = optionId === correctOption.id
-    this.setState(prevState => {
-      // Default to 0 if somehow undefined
-      const updatedUnAttemptedQuestions =
-        timer <= 0
-          ? prevState.unAttemptedQuestions + 1
-          : prevState.unAttemptedQuestions
+    this.setState(
+      prevState => {
+        // Default to 0 if somehow undefined
+        const updatedUnAttemptedQuestions =
+          timer <= 0
+            ? prevState.unAttemptedQuestions + 1
+            : prevState.unAttemptedQuestions
 
-      const updatedCorrectAnswers = isCorrect
-        ? prevState.correctlyAttempted + 1
-        : prevState.correctlyAttempted
+        const updatedCorrectAnswers = isCorrect
+          ? prevState.correctlyAttempted + 1
+          : prevState.correctlyAttempted
 
-      const updatedWrongAnswers = !isCorrect
-        ? prevState.wrongAnswers + 1
-        : prevState.wrongAnswers
+        const updatedWrongAnswers = !isCorrect
+          ? prevState.wrongAnswers + 1
+          : prevState.wrongAnswers
 
-      console.log('Correct Answers:', updatedCorrectAnswers)
-      console.log('Unattempted Questions:', updatedUnAttemptedQuestions)
-      console.log('Wrong Answers:', updatedWrongAnswers)
+        console.log('Correct Answers:', updatedCorrectAnswers)
+        console.log('Unattempted Questions:', updatedUnAttemptedQuestions)
+        console.log('Wrong Answers:', updatedWrongAnswers)
 
-      return {
-        selectedOption: optionId,
-        isNextEnabled: true,
-        correctAnswers: updatedCorrectAnswers,
-        unAttemptedQuestions: updatedUnAttemptedQuestions,
-        wrongAnswers: updatedWrongAnswers,
-      }
-    })
+        return {
+          isNextEnabled: true,
+          correctlyAttempted: updatedCorrectAnswers,
+          unAttemptedQuestions: updatedUnAttemptedQuestions,
+          wrongAnswers: updatedWrongAnswers,
+        }
+      },
+      () => {
+        // Force update context by calling render
+        this.forceUpdate()
+      },
+    )
   }
 
   handleNextQuestion = () => {
@@ -135,6 +139,9 @@ class QuizGameRoute extends Component {
         }),
         this.decrementTimer,
       )
+    } else {
+      const {history} = this.props
+      history.push('/game-results')
     }
     clearInterval(this.timerInterval)
   }
@@ -270,7 +277,12 @@ class QuizGameRoute extends Component {
     const activeQuestion = currentQuestionIndex + 1
     return (
       <QuestionContext.Provider
-        value={{correctlyAttempted, unAttemptedQuestions, wrongAnswers}}
+        value={{
+          correctlyAttempted,
+          totalQuestions,
+          unAttemptedQuestions,
+          wrongAnswers,
+        }}
       >
         <div className="quizgame-container">
           <Header />
@@ -287,27 +299,15 @@ class QuizGameRoute extends Component {
             </div>
 
             <div>{this.renderQuestionOptions(currentQuestion)}</div>
-            {activeQuestion === totalQuestions ? (
-              <Link to="/game-results">
-                <button
-                  type="button"
-                  className={`onclick-button ${buttonStyle}`}
-                  onClick={this.handleNextQuestion}
-                  disabled={!isNextEnabled}
-                >
-                  Submit
-                </button>
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={this.handleNextQuestion}
-                disabled={!isNextEnabled}
-                className={`onclick-button ${buttonStyle}`}
-              >
-                Next Question
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={this.handleNextQuestion}
+              disabled={!isNextEnabled}
+              className={`onclick-button ${buttonStyle}`}
+            >
+              {activeQuestion === totalQuestions ? 'Submit' : 'Next Question'}
+            </button>
           </div>
         </div>
       </QuestionContext.Provider>
