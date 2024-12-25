@@ -9,7 +9,7 @@ class GameReportRoute extends Component {
       totalQuestions,
       unAttemptedQuestions,
       wrongAnswers,
-    } = this.props
+    } = localStorage
 
     // Fallback to localStorage if data is lost
     if (
@@ -18,7 +18,7 @@ class GameReportRoute extends Component {
       unAttemptedQuestions === undefined ||
       wrongAnswers === undefined
     ) {
-      const savedReport = JSON.parse(localStorage.getItem('quizReport'))
+      const savedReport = JSON.parse(localStorage.getItem('quizResults'))
       correctlyAttempted = savedReport?.correctlyAttempted || 0
       totalQuestions = savedReport?.totalQuestions || 0
       unAttemptedQuestions = savedReport?.unAttemptedQuestions || 0
@@ -30,7 +30,7 @@ class GameReportRoute extends Component {
         {unAttemptedQuestions === 0 ? (
           <div className="game-report">
             <p>
-              {correctlyAttempted + wrongAnswers}/{totalQuestions}
+              {totalQuestions}/{totalQuestions}
             </p>
             <div>
               <img

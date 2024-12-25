@@ -2,27 +2,32 @@ import {Component} from 'react'
 
 class GameResults extends Component {
   render() {
-    let {correctlyAttempted, totalQuestions} = this.props
-    const {unAttemptedQuestions, wrongAnswers} = this.props
-    console.log(this.props)
+    let {correctlyAttempted, totalQuestions} = localStorage
+    const {unAttemptedQuestions, wrongAnswers} = localStorage
+
     if (correctlyAttempted === undefined || totalQuestions === undefined) {
-      const savedReport = JSON.parse(localStorage.getItem('quizReport'))
+      const savedReport = JSON.parse(localStorage.getItem('quizResults'))
       correctlyAttempted = savedReport?.correctlyAttempted || 0
       totalQuestions = savedReport?.totalQuestions || 0
     }
     const percentage = parseInt((correctlyAttempted / totalQuestions) * 100, 10)
 
+    const totalCorrect = correctlyAttempted
+    const totalWrong = wrongAnswers
+    const totalunattempt = unAttemptedQuestions
+    console.log(totalCorrect, totalWrong, totalunattempt)
     const onClickReport = () => {
       const {history} = this.props
+
       const quizResults = {
-        correctlyAttempted,
+        correctlyAttempted: totalCorrect,
         totalQuestions,
-        unAttemptedQuestions,
-        wrongAnswers,
+        unAttemptedQuestions: totalunattempt,
+        wrongAnswers: totalWrong,
       }
 
       // Store in localStorage
-      localStorage.setItem('quizReport', JSON.stringify(quizResults))
+      localStorage.setItem('quizResults', JSON.stringify(quizResults))
 
       // Pass the results via history.push
       history.push('/game-report', quizResults)

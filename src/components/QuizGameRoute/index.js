@@ -108,10 +108,6 @@ class QuizGameRoute extends Component {
           ? prevState.wrongAnswers + 1
           : prevState.wrongAnswers
 
-        console.log('Correct Answers:', updatedCorrectAnswers)
-        console.log('Unattempted Questions:', updatedUnAttemptedQuestions)
-        console.log('Wrong Answers:', updatedWrongAnswers)
-
         return {
           isNextEnabled: true,
           correctlyAttempted: updatedCorrectAnswers,
