@@ -31,7 +31,7 @@
   font-size: 20px;
   margin: 0px;
 }
-.onclick-button {
+.next-button {
   background-color: #e4ecf6;
   border-radius: 8px;
   border-width: 0px;
@@ -40,10 +40,9 @@
   font-size: 13px;
   color: black;
   margin: 20px;
+  cursor: pointer;
 }
-.options {
-  list-style-type: none;
-}
+
 .timelimit {
   font-size: 40px;
   margin-top: 0px;
@@ -87,6 +86,7 @@
   font-size: 16px;
   color: black;
   margin: 20px;
+  width: 220px;
 }
 .all-options {
   display: flex;
@@ -123,11 +123,46 @@
   color: white;
   margin: 20px;
 }
+.onclick-button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+}
+
 .image-button {
-  height: 80px;
   width: 150px;
+  height: 150px;
+  cursor: pointer;
 }
 .all-images {
   display: flex;
   flex-direction: column;
+}
+
+.correct-option {
+  background-color: #1c944b; /* Green for correct */
+  color: white;
+  border: 2px solid #1c944b;
+}
+
+.wrong-option {
+  background-color: #bf2626; /* Red for incorrect */
+  color: white;
+  border: 2px solid #bf2626;
+}
+
+.each-option {
+  list-style-type: none;
+}
+
+.feedback-icon {
+  width: 20px;
+  height: 20px;
+}
+.image-option-container,
+.single-select-container {
+  display: flex;
+  align-items: center;
+  gap: 150px;
 }

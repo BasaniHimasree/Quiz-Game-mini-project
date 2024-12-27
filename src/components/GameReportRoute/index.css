@@ -1,0 +1,21 @@
+.quizgame-container {
+  background-image: linear-gradient(to right, #f8d7dc, #f9ebed, #d8d9f6);
+  height: 100vh;
+  background-size: cover;
+}
+
+.quizgame-bottom-container {
+  background-color: #ffffff;
+  margin: 40px;
+  border-radius: 8px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+.question {
+  font-size: 20px;
+}

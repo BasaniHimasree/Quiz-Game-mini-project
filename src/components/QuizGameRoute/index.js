@@ -19,12 +19,15 @@ class QuizGameRoute extends Component {
     questions: [],
     currentQuestionIndex: 0,
     selectedOption: null,
+    correctOption: null,
+    showFeedback: false,
     timer: 15,
     isNextEnabled: false,
     correctlyAttempted: 0,
     unAttemptedQuestions: 0,
     wrongAnswers: 0,
     totalQuestions: 10,
+    reports: [],
   }
 
   componentDidMount() {
@@ -78,20 +81,34 @@ class QuizGameRoute extends Component {
   }
 
   decrementTimer = () => {
-    const {timer} = this.state
+    const {
+      timer,
+      selectedOption,
+
+      questions,
+      currentQuestionIndex,
+    } = this.state
     if (timer > 0) {
       this.setState(prevState => ({timer: prevState.timer - 1}))
     } else {
-      this.handleNextQuestion(true) // Move to next question if time runs out
+      if (!selectedOption) {
+        const unAttemptedQuestion = questions[currentQuestionIndex]
+        this.setState(prevState => ({
+          reports: [...prevState.reports, unAttemptedQuestion],
+          unAttemptedQuestions: prevState.unAttemptedQuestions + 1,
+        }))
+      }
+      this.handleNextQuestion(true)
     }
   }
 
   handleOptionSelect = optionId => {
     const {currentQuestionIndex, questions, timer} = this.state
     const correctOption = questions[currentQuestionIndex].options.find(
-      opt => opt.is_correct,
+      opt => opt.is_correct === 'true',
     )
     const isCorrect = optionId === correctOption.id
+    this.clearTimerInterval()
     this.setState(
       prevState => {
         // Default to 0 if somehow undefined
@@ -109,12 +126,17 @@ class QuizGameRoute extends Component {
           : prevState.wrongAnswers
 
         return {
+          selectedOption: optionId,
+          correctOption: correctOption.id,
           isNextEnabled: true,
+          showFeedback: true,
+
           correctlyAttempted: updatedCorrectAnswers,
           unAttemptedQuestions: updatedUnAttemptedQuestions,
           wrongAnswers: updatedWrongAnswers,
         }
       },
+
       () => {
         // Force update context by calling render
         this.forceUpdate()
@@ -130,9 +152,12 @@ class QuizGameRoute extends Component {
       totalQuestions,
       wrongAnswers,
       unAttemptedQuestions,
+      reports,
     } = this.state
 
     if (currentQuestionIndex + 1 < questions.length) {
+      // If user skips or doesn't select an option, add to reports
+
       this.setState(
         prevState => ({
           currentQuestionIndex: prevState.currentQuestionIndex + 1,
@@ -140,7 +165,9 @@ class QuizGameRoute extends Component {
           selectedOption: null,
           isNextEnabled: false,
         }),
-        this.decrementTimer,
+        () => {
+          this.intervalId = setInterval(this.decrementTimer, 1000)
+        },
       )
     } else {
       const {history} = this.props
@@ -149,7 +176,8 @@ class QuizGameRoute extends Component {
           correctlyAttempted: prevState.correctlyAttempted,
           totalQuestions: prevState.totalQuestions,
           wrongAnswers: prevState.wrongAnswers,
-          unAttemptedQuestions: prevState.unAttemptedQuestions,
+
+          reports: prevState.reports,
         }),
         () => {
           localStorage.setItem(
@@ -159,6 +187,7 @@ class QuizGameRoute extends Component {
               totalQuestions,
               wrongAnswers,
               unAttemptedQuestions,
+              reports,
             }),
           )
 
@@ -167,6 +196,7 @@ class QuizGameRoute extends Component {
             totalQuestions,
             unAttemptedQuestions,
             wrongAnswers,
+            reports,
           })
         },
       )
@@ -174,86 +204,135 @@ class QuizGameRoute extends Component {
   }
 
   renderQuestionOptions = question => {
-    const {selectedOption} = this.state
+    const {selectedOption, correctOption, showFeedback} = this.state
 
-    switch (question.options_type) {
-      case 'DEFAULT':
-        return (
-          <div>
-            <p className="questionText" key={question.id}>
-              {question.question_text}
-            </p>
-            <ul className="all-options">
-              {question.options.map(option => (
-                <li className="each-item" key={option.id}>
+    return (
+      <ul className="options-list">
+        {question.options.map(option => {
+          const isSelected = selectedOption === option.id
+          const isCorrect = correctOption === option.id
+
+          let optionClass = ''
+          if (showFeedback) {
+            if (isSelected && isCorrect) {
+              optionClass = 'correct-option' // Green for correct selection
+            } else if (isSelected && !isCorrect) {
+              optionClass = 'wrong-option' // Red for incorrect selection
+            } else if (isCorrect) {
+              optionClass = 'correct-option' // Green for correct answer
+            }
+          }
+
+          return (
+            <li key={option.id} className={`each-option ${optionClass}`}>
+              {/* DEFAULT OPTION TYPE */}
+              {question.options_type === 'DEFAULT' && (
+                <div className="image-option-container">
                   <button
                     type="button"
-                    aria-label="close"
                     className="onclick-button"
                     onClick={() =>
                       !selectedOption && this.handleOptionSelect(option.id)
                     }
+                    disabled={selectedOption !== null}
                   >
                     {option.text}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      case 'IMAGE':
-        return (
-          <div>
-            <p className="questionText" key={question.id}>
-              {question.question_text}
-            </p>
-            <ul className="all-images">
-              {question.options.map(option => (
-                <li className="each-item" key={option.id}>
+                  </button>{' '}
+                  {showFeedback && (
+                    <>
+                      {isSelected && !isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-close-circle-img.png"
+                          alt="incorrect close circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                      {isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-check-circle-img.png"
+                          alt="correct checked circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* IMAGE OPTION TYPE */}
+              {question.options_type === 'IMAGE' && (
+                <div className="image-option-container">
                   <img
                     src={option.image_url}
                     alt={option.text}
-                    aria-label="close"
                     className="image-button"
                     onClick={() =>
                       !selectedOption && this.handleOptionSelect(option.id)
                     }
+                    disabled={selectedOption !== null}
                   />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
+                  {showFeedback && (
+                    <>
+                      {isSelected && !isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-close-circle-img.png"
+                          alt="incorrect close circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                      {isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-check-circle-img.png"
+                          alt="correct checked circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
-      case 'SINGLE_SELECT':
-        return (
-          <div>
-            <p className="questionText" key={question.id}>
-              {question.question_text}
-            </p>
-            <ul className="all-options">
-              {question.options.map(option => (
-                <li className="each-item" key={option.id}>
+              {/* SINGLE SELECT OPTION TYPE */}
+              {question.options_type === 'SINGLE_SELECT' && (
+                <div className="single-select-container">
                   <input
                     type="radio"
-                    id={`option-${option.id}`}
-                    className="onclick-button"
-                    aria-label="close"
-                    value={option.text}
+                    id={option.id}
+                    name="quiz-option"
+                    className="option-radio"
                     onClick={() =>
                       !selectedOption && this.handleOptionSelect(option.id)
                     }
+                    disabled={selectedOption !== null}
                   />
-                  <label htmlFor={`option-${option.id}`}>{option.text}</label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-
-      default:
-        return null
-    }
+                  <label htmlFor={option.id} className="radio-label">
+                    {option.text}
+                  </label>
+                  {showFeedback && (
+                    <>
+                      {isSelected && !isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-close-circle-img.png"
+                          alt="incorrect close circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                      {isCorrect && (
+                        <img
+                          src="https://assets.ccbp.in/frontend/react-js/quiz-game-check-circle-img.png"
+                          alt="correct checked circle"
+                          className="feedback-icon"
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    )
   }
 
   onClickButton = () => {
@@ -263,7 +342,7 @@ class QuizGameRoute extends Component {
   renderFailureView = () => (
     <div className="quizgame-container">
       <img
-        src="https://res.cloudinary.com/dzy53xuxa/image/upload/v1728795223/Group_7519_hnlpnh.png"
+        src="https://assets.ccbp.in/frontend/react-js/nxt-assess-failure-img.png"
         alt="failure view"
         className="failure-view-image"
       />
@@ -296,6 +375,7 @@ class QuizGameRoute extends Component {
     const currentQuestion = questions[currentQuestionIndex]
 
     const activeQuestion = currentQuestionIndex + 1
+
     return (
       <div className="quizgame-container">
         <Header />
@@ -303,21 +383,29 @@ class QuizGameRoute extends Component {
           <div className="timelimit-container">
             <div className="question-number">
               <p>Question</p>
+              {/* Displaying active question number and total questions */}
               <p className="paragraph">
-                {currentQuestionIndex + 1} / {questions.length}
+                {activeQuestion} / {totalQuestions}
               </p>
             </div>
 
             <p className="timelimit">{timer}</p>
           </div>
 
+          {/* Question text */}
+          <p className="questionText" key={currentQuestion.id}>
+            {currentQuestion.question_text}
+          </p>
+
+          {/* Rendering question options */}
           <div>{this.renderQuestionOptions(currentQuestion)}</div>
 
+          {/* Next button */}
           <button
             type="button"
             onClick={this.handleNextQuestion}
             disabled={!isNextEnabled}
-            className={`onclick-button ${buttonStyle}`}
+            className={`next-button ${buttonStyle}`}
           >
             {activeQuestion === totalQuestions ? 'Submit' : 'Next Question'}
           </button>

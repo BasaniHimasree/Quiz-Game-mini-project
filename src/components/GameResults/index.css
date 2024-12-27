@@ -1,8 +1,15 @@
 .results-container {
-  height: 100vh;
   background-size: cover;
   background-image: url('https://assets.ccbp.in/frontend/react-js/quiz-game-congrats-card-bg.png');
   padding: 200px;
+  margin: 40px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 100px;
+  margin-right: 100px;
 }
 .loose-container {
   height: 100vh;
@@ -10,6 +17,25 @@
   padding: 200px;
 }
 .results-image {
-  height: 500px;
-  width: 600px;
+  height: 300px;
+  width: 400px;
+}
+.quizgame-container {
+  background-image: linear-gradient(to right, #f8d7dc, #f9ebed, #d8d9f6);
+  height: 100vh;
+  background-size: cover;
+}
+.won-background {
+  background-image: url('https://assets.ccbp.in/frontend/react-js/quiz-game-congrats-card-bg.png');
+  background-size: cover;
+  background-position: center;
+  padding: 200px;
+  margin: 40px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 100px;
+  margin-right: 100px;
 }
