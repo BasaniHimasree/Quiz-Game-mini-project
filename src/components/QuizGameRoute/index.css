@@ -164,5 +164,6 @@
 .single-select-container {
   display: flex;
   align-items: center;
-  gap: 150px;
+  justify-content: space-between;
+  gap: 120px;
 }

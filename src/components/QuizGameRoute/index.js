@@ -144,15 +144,53 @@ class QuizGameRoute extends Component {
     )
   }
 
-  handleNextQuestion = () => {
+  submitQuiz = () => {
     const {
-      currentQuestionIndex,
-      questions,
       correctlyAttempted,
       totalQuestions,
       wrongAnswers,
       unAttemptedQuestions,
       reports,
+    } = this.state
+    const {history} = this.props
+
+    this.setState(
+      prevState => ({
+        correctlyAttempted: prevState.correctlyAttempted,
+        totalQuestions: prevState.totalQuestions,
+        wrongAnswers: prevState.wrongAnswers,
+        reports: prevState.reports,
+        unAttemptedQuestions: reports.length,
+      }),
+      () => {
+        localStorage.setItem(
+          'quizResults',
+          JSON.stringify({
+            correctlyAttempted,
+            totalQuestions,
+            wrongAnswers,
+            unAttemptedQuestions,
+            reports,
+          }),
+        )
+
+        history.push('/game-results', {
+          correctlyAttempted,
+          totalQuestions,
+          unAttemptedQuestions,
+          wrongAnswers,
+          reports,
+        })
+      },
+    )
+    console.log(unAttemptedQuestions)
+  }
+
+  handleNextQuestion = () => {
+    const {
+      currentQuestionIndex,
+
+      questions,
     } = this.state
 
     if (currentQuestionIndex + 1 < questions.length) {
@@ -166,40 +204,12 @@ class QuizGameRoute extends Component {
           isNextEnabled: false,
         }),
         () => {
+          this.clearTimerInterval()
           this.intervalId = setInterval(this.decrementTimer, 1000)
         },
       )
     } else {
-      const {history} = this.props
-      this.setState(
-        prevState => ({
-          correctlyAttempted: prevState.correctlyAttempted,
-          totalQuestions: prevState.totalQuestions,
-          wrongAnswers: prevState.wrongAnswers,
-
-          reports: prevState.reports,
-        }),
-        () => {
-          localStorage.setItem(
-            'quizResults',
-            JSON.stringify({
-              correctlyAttempted,
-              totalQuestions,
-              wrongAnswers,
-              unAttemptedQuestions,
-              reports,
-            }),
-          )
-
-          history.push('/game-results', {
-            correctlyAttempted,
-            totalQuestions,
-            unAttemptedQuestions,
-            wrongAnswers,
-            reports,
-          })
-        },
-      )
+      this.submitQuiz()
     }
   }
 
@@ -227,17 +237,16 @@ class QuizGameRoute extends Component {
             <li key={option.id} className={`each-option ${optionClass}`}>
               {/* DEFAULT OPTION TYPE */}
               {question.options_type === 'DEFAULT' && (
-                <div className="image-option-container">
-                  <button
-                    type="button"
-                    className="onclick-button"
-                    onClick={() =>
-                      !selectedOption && this.handleOptionSelect(option.id)
-                    }
-                    disabled={selectedOption !== null}
-                  >
-                    {option.text}
-                  </button>{' '}
+                <button
+                  type="button"
+                  className="onclick-button"
+                  onClick={() =>
+                    !selectedOption && this.handleOptionSelect(option.id)
+                  }
+                  disabled={selectedOption !== null}
+                >
+                  {option.text}
+
                   {showFeedback && (
                     <>
                       {isSelected && !isCorrect && (
@@ -256,19 +265,22 @@ class QuizGameRoute extends Component {
                       )}
                     </>
                   )}
-                </div>
+                </button>
               )}
 
               {/* IMAGE OPTION TYPE */}
               {question.options_type === 'IMAGE' && (
-                <div className="image-option-container">
+                <button
+                  type="button"
+                  className="image-option-container"
+                  onClick={() =>
+                    !selectedOption && this.handleOptionSelect(option.id)
+                  }
+                >
                   <img
                     src={option.image_url}
                     alt={option.text}
                     className="image-button"
-                    onClick={() =>
-                      !selectedOption && this.handleOptionSelect(option.id)
-                    }
                     disabled={selectedOption !== null}
                   />
                   {showFeedback && (
@@ -289,25 +301,26 @@ class QuizGameRoute extends Component {
                       )}
                     </>
                   )}
-                </div>
+                </button>
               )}
 
               {/* SINGLE SELECT OPTION TYPE */}
               {question.options_type === 'SINGLE_SELECT' && (
-                <div className="single-select-container">
+                <button
+                  className="single-select-container"
+                  type="button"
+                  onChange={() =>
+                    !selectedOption && this.handleOptionSelect(option.id)
+                  }
+                >
                   <input
                     type="radio"
-                    id={option.id}
+                    id={`option-${option.id}`}
                     name="quiz-option"
                     className="option-radio"
-                    onClick={() =>
-                      !selectedOption && this.handleOptionSelect(option.id)
-                    }
                     disabled={selectedOption !== null}
                   />
-                  <label htmlFor={option.id} className="radio-label">
-                    {option.text}
-                  </label>
+                  <label htmlFor={`option-${option.id}`}>{option.text}</label>
                   {showFeedback && (
                     <>
                       {isSelected && !isCorrect && (
@@ -326,7 +339,7 @@ class QuizGameRoute extends Component {
                       )}
                     </>
                   )}
-                </div>
+                </button>
               )}
             </li>
           )
@@ -382,13 +395,11 @@ class QuizGameRoute extends Component {
         <div className="quizgame-bottom-container">
           <div className="timelimit-container">
             <div className="question-number">
-              <p>Question</p>
               {/* Displaying active question number and total questions */}
               <p className="paragraph">
-                {activeQuestion} / {totalQuestions}
+                {`Question ${activeQuestion}/${totalQuestions}`}
               </p>
             </div>
-
             <p className="timelimit">{timer}</p>
           </div>
 
@@ -406,6 +417,9 @@ class QuizGameRoute extends Component {
             onClick={this.handleNextQuestion}
             disabled={!isNextEnabled}
             className={`next-button ${buttonStyle}`}
+            aria-label={
+              activeQuestion === totalQuestions ? 'Submit' : 'Next Question'
+            }
           >
             {activeQuestion === totalQuestions ? 'Submit' : 'Next Question'}
           </button>

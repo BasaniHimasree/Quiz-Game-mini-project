@@ -34,8 +34,20 @@
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-center;
+  align-items: flex-center;
   margin-left: 100px;
   margin-right: 100px;
+}
+.button-style1 {
+  background-color: #008cff;
+  border-radius: 8px;
+  border-width: 0px;
+  height: 40px;
+  width: 120px;
+  font-size: 13px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-center;
 }
